@@ -6,7 +6,7 @@
 //   npm run release -- "What's new in this version"     (optional notes; otherwise GitHub writes them from the commits)
 //
 // Needs Git, and the GitHub CLI (gh) signed in to the account that owns the repo.
-import { execFileSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,8 +18,8 @@ const slug = `${owner}/${repo}`;
 const tag = `v${pkg.version}`;
 const notes = process.argv.slice(2).join(' ').trim();
 
-const run = (cmd, args, { quiet = false, shell = false } = {}) =>
-  execFileSync(cmd, args, { cwd: root, encoding: 'utf8', stdio: quiet ? 'pipe' : 'inherit', shell });
+const run = (cmd, args, { quiet = false } = {}) =>
+  execFileSync(cmd, args, { cwd: root, encoding: 'utf8', stdio: quiet ? 'pipe' : 'inherit' });
 const ok = (cmd, args) => { try { run(cmd, args, { quiet: true }); return true; } catch { return false; } };
 const stop = msg => { console.error(`\n${msg}`); process.exit(1); };
 
@@ -31,7 +31,7 @@ if (ok('gh', ['release', 'view', tag, '--repo', slug])) stop(`${tag} is already 
 
 // the build
 console.log('Building the installer (this takes a few minutes)...');
-run('npx', ['electron-builder', '--win', '--x64', '--publish', 'never'], { shell: true });
+execSync('npx electron-builder --win --x64 --publish never', { cwd: root, stdio: 'inherit' });   // npx needs a shell on Windows
 const files = [`Hatch-Setup-${pkg.version}.exe`, `Hatch-Setup-${pkg.version}.exe.blockmap`, 'latest.yml'].map(f => path.join(root, 'dist', f));
 for (const f of files) if (!fs.existsSync(f)) stop(`The build didn't make ${path.basename(f)}.`);
 
