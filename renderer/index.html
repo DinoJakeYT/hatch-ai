@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src file:; style-src file: 'unsafe-inline'; img-src file: data:; font-src file: data:">
+  <title>Hatch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand"><img src="../assets/logo.svg" alt=""><span>Hatch</span></div>
+      <button id="newChat" class="new-chat">
+        <svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg>
+        New chat
+      </button>
+      <div class="list-head">
+        <span>Chats</span>
+        <button id="newGroup" class="icon-btn" title="New group">
+          <svg viewBox="0 0 20 20"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 2h7.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/><path d="M10 9v4M8 11h4"/></svg>
+        </button>
+      </div>
+      <nav id="chatList"></nav>
+      <button id="toggleHidden" class="hidden-toggle" hidden></button>
+      <div id="usageMeter" class="usage-meter" hidden></div>
+      <button id="updateBtn" class="update-btn" hidden></button>
+      <button id="settingsBtn" class="settings-btn">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
+        <span>Settings</span>
+      </button>
+    </aside>
+
+    <main>
+      <header id="topbar">
+        <div id="chatTitle">New chat</div>
+        <div class="spacer"></div>
+        <button id="playBtn" class="chip play" title="Run what the AI built" hidden>
+          <svg viewBox="0 0 20 20"><path d="M6.5 4.5v11l9-5.5z"/></svg>
+          <span>Play</span>
+        </button>
+        <button id="folderBtn" class="chip" title="Project folder">
+          <svg viewBox="0 0 20 20"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 2h7.5a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/></svg>
+          <span id="folderLabel">New folder</span>
+        </button>
+        <button id="permBtn" class="chip" title="What the AI may do without asking"></button>
+        <button id="modelBtn" class="chip" title="Choose which AI to use"></button>
+      </header>
+
+      <section id="scroller">
+        <div id="welcome">
+          <img src="../assets/logo.svg" alt="">
+          <h1>What should we hatch today?</h1>
+          <p>Pick any AI, then chat or have it build something in this chat's own folder.</p>
+          <div id="welcomeUsing" class="using"></div>
+        </div>
+        <div id="messages"></div>
+      </section>
+
+      <footer id="composer">
+        <div id="activity" class="activity" hidden></div>
+        <div id="banner" class="banner" hidden>
+          <div id="bannerText"></div>
+          <button id="bannerBtn2" hidden></button>
+          <button id="bannerBtn" class="primary"></button>
+        </div>
+        <div id="nightBar" class="night-bar" hidden>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 12.5A6.5 6.5 0 0 1 7.5 4.5a6.5 6.5 0 1 0 8 8z"/></svg>
+          <div id="nightText"></div>
+          <button id="nightStop" class="btn">Stop</button>
+        </div>
+        <div class="box">
+          <button id="nightBtn" class="night-btn" title="Work on this overnight" hidden>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 12.5A6.5 6.5 0 0 1 7.5 4.5a6.5 6.5 0 1 0 8 8z"/></svg>
+          </button>
+          <textarea id="input" rows="1" placeholder="Message Hatch…"></textarea>
+          <button id="send" title="Send" disabled>
+            <svg class="icon-send" viewBox="0 0 20 20"><path d="M10 16V4M5 9l5-5 5 5"/></svg>
+            <svg class="icon-stop" viewBox="0 0 20 20"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/></svg>
+          </button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <div id="popover" class="popover" hidden></div>
+
+  <dialog id="settings">
+    <div class="dlg">
+      <div class="dlg-head">
+        <h2>Settings</h2>
+        <button class="icon-btn" data-close title="Close"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </div>
+      <div class="settings-wrap">
+        <div class="tabs" id="tabs"></div>
+        <div class="panes">
+
+          <div class="pane" data-pane="accounts">
+            <h3>Accounts</h3>
+            <p class="hint">Sign in to use the plans you already pay for. Sign-in opens inside Hatch.</p>
+            <div class="card-set" id="acct-sub"></div>
+            <div class="card-set" id="acct-chatgpt"></div>
+            <div class="card-set">
+              <div class="title-line"><span data-av="gemini"></span>Gemini</div>
+              <p class="hint">Google retired signing in to Gemini's command-line tool with a personal Google account, so Gemini runs on a Gemini API key. Get a free one at aistudio.google.com, then add it under API keys.</p>
+            </div>
+          </div>
+
+          <div class="pane" data-pane="keys">
+            <h3>API keys</h3>
+            <p class="hint">Pay-as-you-go keys. They're saved encrypted on this PC and only sent to their own service.</p>
+            <div id="keyCards"></div>
+            <div class="card-set">
+              <div class="title-line"><span data-av="custom"></span>Custom provider<span class="st">Any Anthropic-compatible API (DeepSeek, Kimi, GLM, MiniMax…)</span></div>
+              <div class="line">
+                <label class="field">Name<input type="text" id="customName" placeholder="Custom"></label>
+                <label class="field" style="flex:2">Base URL<input type="text" id="customUrl" placeholder="https://api.example.com/anthropic"></label>
+              </div>
+              <label class="field">Models (comma separated)<input type="text" id="customModels" placeholder="model-a, model-b"></label>
+              <div class="line"><button class="btn primary" id="customSave">Save provider</button><span class="status-text" id="customStatus"></span></div>
+            </div>
+            <div class="card-set">
+              <div class="title-line">Extra model names</div>
+              <p class="hint">Add model IDs to the menu (comma separated). Leave empty to use each service's default.</p>
+              <label class="field">ChatGPT sign-in<input type="text" id="extra-chatgpt" placeholder="e.g. gpt-5.1-codex"></label>
+              <label class="field">OpenAI API key<input type="text" id="extra-openai"></label>
+              <label class="field">Gemini API key<input type="text" id="extra-gemini" placeholder="e.g. gemini-2.5-pro"></label>
+              <div class="line"><button class="btn primary" id="extraSave">Save</button><span class="status-text" id="extraStatus"></span></div>
+            </div>
+          </div>
+
+          <div class="pane" data-pane="local">
+            <h3>Local models (Ollama)</h3>
+            <p class="hint">Runs models on your own PC for free.</p>
+            <div class="card-set">
+              <div class="line"><input type="text" id="ollamaUrl"><button class="btn primary" id="ollamaCheck">Save &amp; check</button></div>
+              <span class="status-text" id="ollamaStatus"></span>
+            </div>
+            <div class="card-set">
+              <div class="title-line">Your models <span class="st" id="gpuInfo"></span></div>
+              <div id="modelList" class="model-list"></div>
+            </div>
+            <div class="card-set">
+              <div class="title-line">Get more models</div>
+              <p class="hint">Free downloads through Ollama. A model that fits your graphics card runs several times faster than one that spills onto the CPU.</p>
+              <div id="modelRecs" class="model-list"></div>
+              <div class="line"><input type="text" id="modelName" placeholder="Any model from ollama.com/library, like llama3.1:8b" spellcheck="false"><button class="btn" id="modelPull">Download</button></div>
+              <span class="status-text" id="modelStatus"></span>
+            </div>
+            <div class="card-set">
+              <div class="title-line">How local models build things</div>
+              <label class="perm-opt"><input type="radio" name="localEngine" value="hatch">
+                <div><b>Hatch tools (recommended)</b><span>A few simple actions (create file, edit, run, read, open, remember) that even small models handle. Works with every model.</span></div></label>
+              <label class="perm-opt"><input type="radio" name="localEngine" value="claude">
+                <div><b>Claude Code tools</b><span>The full Claude Code toolset. Only big models with tool support (like glm-4.7-flash) keep up with it.</span></div></label>
+              <label class="field">Context size (tokens the model can keep in mind)<input type="number" id="localContext" min="4096" step="4096"></label>
+              <p class="hint">Bigger lets it remember more of the chat but uses more memory. When a chat gets too long, the model summarizes the older part itself.</p>
+              <label class="field">Thinking (models like glm think silently before each step)<select id="localThinking">
+                <option value="auto">Think when working alone, not as a team helper (recommended)</option>
+                <option value="on">Always think (smarter, much slower)</option>
+                <option value="off">Never think (fastest)</option>
+              </select></label>
+              <div class="line"><span class="status-text" id="toolchainStatus">Checking this PC's tools…</span><button class="btn" id="toolchainRefresh">Re-check tools</button></div>
+            </div>
+            <div class="card-set">
+              <div class="title-line">raylib (3D game library)<span class="st" id="raylibStatus"></span></div>
+              <p class="hint">An easy C++ library for 3D and 2D games (cubes, models, cameras, sound) that AIs know well. Optional: without it, 3D games use OpenGL, which is built into Windows. Downloads the official build from github.com/raysan5/raylib (about 2.5 MB).</p>
+              <div class="line"><button class="btn primary" id="raylibInstall">Install raylib</button><span class="status-text" id="raylibProgress"></span></div>
+            </div>
+            <div class="card-set">
+              <div class="title-line">Seeing screenshots</div>
+              <p class="hint">When a local model previews what it built, models that can see images get the screenshot itself. For the rest, this vision model looks at it and describes it in words, and Hatch adds measured facts (size, main colors, blank or not). Small vision models like moondream are rough; for sharper descriptions install a bigger one, e.g. <code>ollama pull qwen2.5vl</code> or <code>ollama pull gemma3:4b</code>.</p>
+              <label class="field">Vision model<select id="visionModel"></select></label>
+            </div>
+          </div>
+
+          <div class="pane" data-pane="skills">
+            <h3>Skills</h3>
+            <p class="hint">Skills are folders of instructions (sometimes with scripts) that teach an AI how to do something, in the SKILL.md format Claude, ChatGPT (Codex) and Gemini share. Hatch gives your skills to every AI, local models included. Only import skills from people you trust: the AI will follow them.</p>
+            <div class="card-set">
+              <div class="title-line">Import from GitHub</div>
+              <div class="line"><input type="text" id="skillUrl" placeholder="https://github.com/owner/repo, or a link to one skill folder" spellcheck="false"><button class="btn primary" id="skillFind">Find skills</button></div>
+              <span class="status-text" id="skillFindStatus"></span>
+              <div id="skillFound" class="skill-found"></div>
+              <div class="line" id="skillImportLine" hidden><button class="btn primary" id="skillImport">Import selected</button><button class="btn" id="skillAll">Select all</button></div>
+            </div>
+            <div class="line">
+              <button class="btn primary" id="skillNew">New skill</button>
+              <button class="btn" id="skillFolder">Import from a folder…</button>
+              <button class="btn" id="skillOpen">Open skills folder</button>
+              <span class="status-text" id="skillFolderStatus"></span>
+            </div>
+            <h3>Installed</h3>
+            <div id="skillList" class="skill-list"></div>
+            <p class="hint">Claude chats can also use the skills you installed in Claude Code itself.</p>
+          </div>
+
+          <div class="pane" data-pane="guides">
+            <h3>Guides for local models</h3>
+            <p class="hint">Step-by-step methods local models follow, the way stronger AIs work: plan, build in small steps, test, fix the real error, then finish. "general" is always used; the others are picked by the keywords on their first line (for example C++ for "make a C++ game").</p>
+            <div class="line">
+              <select id="guideSelect" style="flex:1"></select>
+              <button class="btn" id="guideNew">New guide</button>
+              <button class="btn" id="guideFolder">Open folder</button>
+            </div>
+            <textarea id="guideText" spellcheck="false" style="min-height:320px"></textarea>
+            <div class="line"><button class="btn primary" id="guideSave">Save</button><span class="status-text" id="guideStatus"></span></div>
+          </div>
+
+          <div class="pane" data-pane="teams">
+            <h3>Teams</h3>
+            <p class="hint">A team is a lead AI plus helper AIs it can hand work to. The lead plans and checks; helpers do the hands-on coding, building and testing. Give the heavy work to a local model or a cheaper AI to save usage on the important one. Pick a team from the AI menu at the top of a chat.</p>
+            <div id="teamList" class="team-list"></div>
+            <div class="line"><button class="btn primary" id="teamNew">New team</button></div>
+            <p class="hint">Claude (subscription, API key, OpenRouter, custom), ChatGPT/OpenAI and local models can lead. Any AI can be a helper. Helpers work one at a time in the chat's project folder, and each keeps its own memory of the chat.</p>
+          </div>
+
+          <div class="pane" data-pane="about">
+            <h3>Hatch <span id="aboutVersion"></span></h3>
+            <p class="hint">Free and open source under the GPL-3.0 license. <a id="aboutLink" href="https://github.com/DinoJakeYT/hatch-ai">Source code, releases and issues on GitHub</a></p>
+            <div class="card-set">
+              <div class="title-line">Updates <span class="st" id="updateState"></span></div>
+              <p class="hint">Hatch checks GitHub for a new version every few hours, downloads it in the background, and installs it when you restart Hatch (or the next time you close it). Your chats, settings and projects stay as they are.</p>
+              <div class="line"><button class="btn" id="updateCheck">Check now</button><button class="btn primary" id="updateInstall" hidden>Restart and update</button></div>
+            </div>
+          </div>
+
+          <div class="pane" data-pane="behavior">
+            <h3>Permissions</h3>
+            <p class="hint">What new chats may do without asking. Each chat can change it from the shield button at the top.</p>
+            <div id="defaultPerms" style="display:flex;flex-direction:column;gap:8px"></div>
+            <h3>Display</h3>
+            <label class="check-line"><input type="checkbox" id="showMeter"> Show the usage meter in the sidebar</label>
+          </div>
+
+          <div class="pane" data-pane="memory">
+            <h3>Instructions</h3>
+            <p class="hint">Given to every AI in every chat, like a shared rule book.</p>
+            <textarea id="instrText" spellcheck="false"></textarea>
+            <div class="line">
+              <button class="btn primary" id="instrSave">Save</button>
+              <button class="btn" id="instrOpen">Open file</button>
+              <button class="btn" id="instrCompress">Compress with local model</button>
+              <span class="status-text" id="instrStatus"></span>
+            </div>
+            <h3>Memory</h3>
+            <p class="hint">Facts the AIs remember between chats. They read it (it's included when short) and add a line when they learn something worth keeping.</p>
+            <textarea id="memText" spellcheck="false"></textarea>
+            <div class="line">
+              <button class="btn primary" id="memSave">Save</button>
+              <button class="btn" id="memOpen">Open file</button>
+              <button class="btn" id="memCompress">Compress with local model</button>
+              <span class="status-text" id="memStatus"></span>
+            </div>
+            <div class="card-set">
+              <div class="line">
+                <label class="field">Local model for compressing<select id="compressModel"></select></label>
+                <label class="field">Auto-compress memory over (characters)<input type="number" id="compressAt" min="1000" step="500"></label>
+              </div>
+              <label class="check-line"><input type="checkbox" id="autoCompress"> Compress memory automatically when it gets that long (keeps a backup)</label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="usageDlg">
+    <div class="dlg">
+      <div class="dlg-head">
+        <h2>Usage &amp; limits</h2>
+        <span class="status-text" id="usageUpdated"></span>
+        <button class="btn" id="usageRefresh">Refresh</button>
+        <button class="icon-btn" data-close title="Close"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </div>
+      <div class="dlg-body">
+        <div class="usage-grid" id="usageGrid"></div>
+        <div class="card-set">
+          <div class="title-line">Monthly budgets</div>
+          <p class="hint">For pay-as-you-go keys. Hatch counts Claude API spend itself and reads OpenRouter's own numbers.</p>
+          <div class="line">
+            <label class="field">Claude API ($ per month, 0 = none)<input type="number" id="budget-anthropic" min="0" step="1"></label>
+            <label class="field">OpenRouter ($ per month, 0 = none)<input type="number" id="budget-openrouter" min="0" step="1"></label>
+          </div>
+          <label class="check-line"><input type="checkbox" id="stopAtBudget"> Stop sending to a provider when its budget is reached</label>
+          <div class="line"><button class="btn primary" id="budgetSave">Save budgets</button><span class="status-text" id="budgetStatus"></span></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="nightDlg">
+    <div class="dlg">
+      <div class="dlg-head">
+        <h2>Work overnight</h2>
+        <button class="icon-btn" data-close title="Close"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </div>
+      <div class="dlg-body">
+        <label class="field">What should it build or improve?
+          <textarea id="nightGoal" rows="4" placeholder="e.g. A 3D C++ game where you fly a ship collecting yellow cubes, with a score, sounds and a menu"></textarea>
+        </label>
+        <div class="line">
+          <label class="field" style="flex:0 0 150px">Work until<input type="time" id="nightUntil"></label>
+          <div class="line" style="align-self:flex-end">
+            <button class="btn" data-hours="1">1 hour</button>
+            <button class="btn" data-hours="3">3 hours</button>
+            <button class="btn" data-until="07:00">7:00 AM</button>
+          </div>
+        </div>
+        <ul class="night-notes">
+          <li>It plans, builds, tests and fixes on its own, then keeps improving, all inside this chat's project folder, without asking.</li>
+          <li>It saves a checkpoint (with git) after every working build. In the morning the project is at its last working version.</li>
+          <li>Hatch keeps your PC awake. Leave Hatch open (minimizing is fine).</li>
+          <li>You get a report and a notification when it's done.</li>
+        </ul>
+        <span class="status-text" id="nightStatus"></span>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn" data-close>Cancel</button>
+        <button class="btn primary" id="nightStart">Start working</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="skillDlg">
+    <div class="dlg">
+      <div class="dlg-head">
+        <h2 id="skillDlgTitle">New skill</h2>
+        <button class="icon-btn" data-close title="Close"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </div>
+      <div class="dlg-body">
+        <label class="field">Name<input type="text" id="skillName" placeholder="Short, like raylib-fps-game" spellcheck="false"></label>
+        <label class="field">When should an AI use it?<input type="text" id="skillDesc" placeholder="One line, like: Use when making a first-person shooter in C++ with raylib"></label>
+        <label class="field">Instructions (Markdown)<textarea id="skillBody" spellcheck="false" placeholder="# How to ...&#10;&#10;1. First...&#10;2. Then...&#10;&#10;Tips, rules, example code: whatever the AI should follow."></textarea></label>
+        <p class="hint">Every AI in Hatch gets your skills in new chats and uses one when its description fits the task. Keep it focused: one kind of job per skill.</p>
+        <span class="status-text" id="skillDlgStatus"></span>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn" data-close>Cancel</button>
+        <button class="btn primary" id="skillDlgSave">Save skill</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="confirmDlg">
+    <div class="dlg">
+      <div class="dlg-head"><h2 id="confirmTitle"></h2></div>
+      <div class="dlg-body">
+        <p class="hint" id="confirmText"></p>
+        <label class="check-line" id="confirmCheckLine"><input type="checkbox" id="confirmCheck"> <span id="confirmCheckText"></span></label>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn" id="confirmNo">Cancel</button>
+        <button class="btn primary" id="confirmYes"></button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="../node_modules/marked/lib/marked.umd.js"></script>
+  <script src="../node_modules/dompurify/dist/purify.min.js"></script>
+  <script src="core.js"></script>
+  <script src="chat.js"></script>
+  <script src="sidebar.js"></script>
+  <script src="picker.js"></script>
+  <script src="usage.js"></script>
+  <script src="settings.js"></script>
+  <script src="overnight.js"></script>
+  <script src="boot.js"></script>
+</body>
+</html>

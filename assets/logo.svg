@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f5e58"/>
+      <stop offset="1" stop-color="#0a3533"/>
+    </linearGradient>
+    <linearGradient id="shell" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#fff8e8"/>
+      <stop offset="1" stop-color="#f1d9a8"/>
+    </linearGradient>
+    <clipPath id="egg">
+      <path d="M128 34C171 34 198 106 198 150C198 194 167 224 128 224C89 224 58 194 58 150C58 106 85 34 128 34Z"/>
+    </clipPath>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#tile)"/>
+  <path d="M128 34C171 34 198 106 198 150C198 194 167 224 128 224C89 224 58 194 58 150C58 106 85 34 128 34Z" fill="url(#shell)"/>
+  <g clip-path="url(#egg)" fill="#22a58e">
+    <circle cx="103" cy="86" r="11"/>
+    <circle cx="152" cy="96" r="8"/>
+    <circle cx="126" cy="64" r="5"/>
+    <circle cx="90" cy="184" r="13"/>
+    <circle cx="160" cy="180" r="10"/>
+    <circle cx="128" cy="204" r="6"/>
+    <circle cx="186" cy="150" r="7"/>
+  </g>
+  <path d="M60 142L84 128L101 148L122 124L141 148L161 127L177 145L198 132" fill="none" stroke="#0a3533" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M203 40l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#ffd27a"/>
+</svg>
