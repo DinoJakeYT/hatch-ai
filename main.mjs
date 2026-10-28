@@ -22,6 +22,7 @@ import * as teams from './lib/teams.mjs';
 import * as checkpoints from './lib/checkpoints.mjs';
 import * as localModels from './lib/models.mjs';
 import * as updater from './lib/updater.mjs';
+import * as remote from './lib/remote.mjs';
 import * as claudeEngine from './engines/claude.mjs';
 import * as codexEngine from './engines/codex.mjs';
 import * as geminiEngine from './engines/gemini.mjs';
@@ -116,6 +117,7 @@ function makeProjectDir(title, id) {
 
 function send(channel, payload) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
+  if (channel === 'chat:event') remote.broadcast(channel, payload);   // phones see the chats live too
 }
 const emit = (chatId, ev) => send('chat:event', { chatId, ...ev });
 
@@ -612,7 +614,10 @@ ipcMain.handle('chat:get', (_e, id) => {
   return chat && { ...chat, running: runs.has(id), activity: activityList(id) };
 });
 
-ipcMain.handle('chat:send', (_e, { chatId, text, model, team, cwd, permission }) => {
+ipcMain.handle('chat:send', (_e, args) => sendToChat(args));
+
+// A message from the window or a phone: starts a turn (and a new chat when there's no chatId).
+function sendToChat({ chatId, text, model, team, cwd, permission }) {
   let chat = chatId && loadChat(chatId);
   if (!chat) {
     const id = crypto.randomUUID();
@@ -637,7 +642,7 @@ ipcMain.handle('chat:send', (_e, { chatId, text, model, team, cwd, permission })
   if (permission) chat.permission = permission;
   runTurn(chat, text);
   return { chatId: chat.id, chat: { ...chat, running: true } };
-});
+}
 
 ipcMain.handle('chat:stop', (_e, id) => { runs.get(id)?.abort.abort(); });
 
@@ -663,7 +668,10 @@ ipcMain.handle('chat:delete', async (_e, id, { trashFolder = false } = {}) => {
 
 // ---------- IPC: undo and redo ----------
 
-ipcMain.handle('chat:undo', async (_e, id, index) => {
+ipcMain.handle('chat:undo', (_e, id, index) => undoChat(id, index));
+ipcMain.handle('chat:redo', (_e, id, index) => redoChat(id, index));
+
+async function undoChat(id, index) {
   const chat = loadChat(id);
   const it = chat?.items[index];
   if (!it?.checkpoint) return { error: 'There\'s no saved version from before this message.' };
@@ -681,9 +689,9 @@ ipcMain.handle('chat:undo', async (_e, id, index) => {
   } catch (err) {
     return { error: err.message };
   }
-});
+}
 
-ipcMain.handle('chat:redo', async (_e, id, index) => {
+async function redoChat(id, index) {
   const chat = loadChat(id);
   const it = chat?.items[index];
   if (!it?.redo) return { error: 'Nothing to bring back.' };
@@ -698,7 +706,7 @@ ipcMain.handle('chat:redo', async (_e, id, index) => {
   } catch (err) {
     return { error: err.message };
   }
-});
+}
 
 // ---------- IPC: playing what was built ----------
 
@@ -769,7 +777,9 @@ ipcMain.handle('groups:set', (_e, groups) => {
   saveSettings();
 });
 
-ipcMain.handle('perm:respond', (_e, reqId, decision) => {
+ipcMain.handle('perm:respond', (_e, reqId, decision) => respondPermission(reqId, decision));
+
+function respondPermission(reqId, decision) {
   const p = pendingPerms.get(reqId);
   if (!p) return;
   pendingPerms.delete(reqId);
@@ -782,7 +792,7 @@ ipcMain.handle('perm:respond', (_e, reqId, decision) => {
   Object.assign(chat.items[p.idx], { perm: { reqId, status: allowed ? 'allowed' : 'denied' }, ...(allowed ? {} : { status: 'denied' }) });
   emit(chat.id, { kind: 'item-update', index: p.idx, patch: chat.items[p.idx] });
   p.resolve(allowed);
-});
+}
 
 ipcMain.handle('folder:pick', async () => {
   const r = await dialog.showOpenDialog(win, { properties: ['openDirectory', 'createDirectory'] });
@@ -901,8 +911,10 @@ ipcMain.handle('skills:save', (_e, data) => {
   }
 });
 
+ipcMain.handle('skills:decide', (_e, chatId, index, decision, edited) => decideSkill(chatId, index, decision, edited));
+
 // An AI's skill proposal in a chat: approve it (maybe after editing it) or decline it.
-ipcMain.handle('skills:decide', (_e, chatId, index, decision, edited) => {
+function decideSkill(chatId, index, decision, edited) {
   const chat = loadChat(chatId);
   const it = chat?.items[index];
   if (it?.name !== 'SkillProposal' || it.status !== 'pending') return { error: 'That proposal was already decided.' };
@@ -920,7 +932,7 @@ ipcMain.handle('skills:decide', (_e, chatId, index, decision, edited) => {
   } catch (err) {
     return { error: err.message };
   }
-});
+}
 ipcMain.handle('skills:open', () => shell.openPath(skills.SKILLS_DIR));
 
 ipcMain.handle('libs:status', () => ({ raylib: libs.raylib() }));
@@ -1019,6 +1031,68 @@ app.on('second-instance', () => {
   win.focus();
 });
 
+// ---------- phone access (lib/remote.mjs serves the phone; this is what it can see and do) ----------
+
+const CLAUDE_CHOICES = [['', 'Default'], ['opus', 'Opus'], ['sonnet', 'Sonnet'], ['haiku', 'Haiku']];
+
+// What a new chat on the phone can use: teams, then every AI that's ready.
+async function phoneModels() {
+  if (!loginCache.sub) [loginCache.sub, loginCache.chatgpt] = await Promise.all([signin.status('sub'), signin.status('chatgpt')]);
+  const out = (settings.teams || []).map(t => ({ value: t.lead, team: t.id, label: `Team: ${t.name}` }));
+  if (loginCache.sub?.signedIn) out.push(...CLAUDE_CHOICES.map(([m, l]) => ({ value: `sub:${m}`, label: `Claude ${l}` })));
+  if (keyHint('anthropic')) out.push(...CLAUDE_CHOICES.slice(1).map(([m, l]) => ({ value: `api:${m}`, label: `Claude API ${l}` })));
+  if (loginCache.chatgpt?.signedIn) out.push({ value: 'chatgpt:', label: 'ChatGPT' });
+  if (keyHint('openai')) out.push({ value: 'openai:', label: 'OpenAI' });
+  if (keyHint('gemini') && NODE_EXE) out.push({ value: 'gemini:', label: 'Gemini' });
+  if (keyHint('openrouter')) out.push(...(settings.favorites?.openrouter || []).map(id => ({ value: `openrouter:${id}`, label: `OpenRouter ${id}` })));
+  for (const m of (await ollamaModels()).models) if (m.tools) out.push({ value: `local:${m.name}`, label: `Local ${m.name.replace(/:latest$/, '')}` });
+  return out;
+}
+
+// Long file contents and outputs are cut down for the phone's screen (and its data plan).
+function forPhone(item) {
+  const cut = (s, n) => (typeof s === 'string' && s.length > n ? `${s.slice(0, n)}\n… (more on the PC)` : s);
+  const tail = (s, n) => (typeof s === 'string' && s.length > n ? `…\n${s.slice(-n)}` : s);
+  const out = { ...item, result: cut(item.result, 3000), text: cut(item.text, 20000) };
+  if (item.input) out.input = { ...item.input, content: tail(item.input.content, 3000), old_string: cut(item.input.old_string, 1500), new_string: cut(item.input.new_string, 1500), body: cut(item.input.body, 6000) };
+  return out;
+}
+
+const phoneApi = {
+  state: async () => ({
+    version: app.getVersion(),
+    chats: listChats().filter(c => !c.hidden).slice(0, 80),
+    models: await phoneModels(),
+    defaultPermission: settings.defaultPermission,
+  }),
+  chat: id => {
+    const chat = loadChat(id);
+    if (!chat) return { error: 'That chat is gone.' };
+    const offset = Math.max(0, chat.items.length - 150);   // the latest part of a long chat
+    return {
+      id: chat.id, title: chat.title, model: chat.model, team: teams.teamFor(chat)?.name || null, permission: chat.permission,
+      folder: path.basename(chat.cwd), running: runs.has(id), activity: activityList(id), offset, items: chat.items.slice(offset).map(forPhone),
+    };
+  },
+  actions: {
+    send: b => {
+      const text = String(b.text || '').trim();
+      if (!text) return { error: 'Type a message first.' };
+      const r = sendToChat({ chatId: b.chatId || null, text, model: b.model || undefined, team: b.chatId ? undefined : b.team || null, permission: b.permission || undefined });
+      return { chatId: r.chatId, queued: !!r.queued };
+    },
+    stop: b => { runs.get(b.chatId)?.abort.abort(); },
+    perm: b => respondPermission(b.reqId, ['allow', 'always', 'deny'].includes(b.decision) ? b.decision : 'deny'),
+    skill: b => decideSkill(b.chatId, Number(b.index), b.decision === 'approve' ? 'approve' : 'decline'),
+    undo: b => undoChat(b.chatId, Number(b.index)),
+    redo: b => redoChat(b.chatId, Number(b.index)),
+  },
+};
+
+ipcMain.handle('remote:get', () => remote.status());
+ipcMain.handle('remote:set', (_e, patch) => { remote.configure(patch); return remote.status(); });
+ipcMain.handle('remote:reset', () => { remote.resetKey(); return remote.status(); });
+
 // ---------- version and updates ----------
 
 ipcMain.handle('app:info', () => ({ version: app.getVersion(), packaged: app.isPackaged, homepage: PKG.homepage }));
@@ -1030,5 +1104,6 @@ ipcMain.handle('update:install', () => updater.install());
 app.whenReady().then(() => {
   createWindow();
   updater.start(status => send('update:status', status));
+  remote.init(phoneApi, () => send('remote:changed'));
 });
 app.on('window-all-closed', () => app.quit());

@@ -59,6 +59,11 @@ contextBridge.exposeInMainWorld('hatch', {
   deleteModel: name => invoke('models:delete', name),
   onPullProgress: on('models:progress'),
 
+  phoneStatus: () => invoke('remote:get'),
+  setPhone: patch => invoke('remote:set', patch),
+  resetPhoneKey: () => invoke('remote:reset'),
+  onPhoneChanged: on('remote:changed'),
+
   appInfo: () => invoke('app:info'),
   updateStatus: () => invoke('update:get'),
   checkForUpdate: () => invoke('update:check'),

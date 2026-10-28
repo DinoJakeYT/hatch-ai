@@ -138,6 +138,7 @@ const ICON = {
   undo: '<path d="M7.5 5L4 8.5 7.5 12"/><path d="M4 8.5h8a4 4 0 0 1 0 8H9"/>',
   play: '<path d="M6.5 4.5v11l9-5.5z"/>',
   download: '<path d="M10 3.5v9M6 8.5l4 4 4-4M4 16.5h12"/>',
+  phone: '<rect x="5.5" y="2.5" width="9" height="15" rx="2"/><path d="M9 15h2"/>',
 };
 const svg = paths => `<svg viewBox="0 0 20 20" aria-hidden="true">${paths}</svg>`;
 

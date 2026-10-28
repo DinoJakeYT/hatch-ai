@@ -1,0 +1,129 @@
+/* Hatch on a phone: same colors as the desktop app, laid out for one hand. */
+:root {
+  --bg: #f6f7f5;
+  --surface: #ffffff;
+  --text: #182120;
+  --muted: #66716f;
+  --border: #dde2de;
+  --ai-bubble: #e9ecea;
+  --user-bubble: #0f766e;
+  --accent: #0f9488;
+  --accent-soft: #14b8a6;
+  --code-bg: #1c2422;
+  --code-text: #eef3f1;
+  --ok: #2f8a4f;
+  --err: #c0392b;
+  --amber: #b7791f;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161b1c;
+    --surface: #1f2627;
+    --text: #eef3f1;
+    --muted: #94a19e;
+    --border: #2d3637;
+    --ai-bubble: #252d2e;
+    --code-bg: #0e1213;
+    --amber: #e0a43c;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+button, select, textarea, input { font: inherit; color: inherit; }
+svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+[hidden] { display: none !important; }
+
+.view { display: flex; flex-direction: column; height: 100dvh; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; border-bottom: 1px solid var(--border); background: var(--surface); flex: none; }
+.bar h1 { font-size: 20px; margin: 0; flex: 1; }
+.bar .logo { width: 28px; height: 28px; }
+.titles { flex: 1; min-width: 0; }
+.title { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conn { width: 9px; height: 9px; border-radius: 50%; background: var(--err); flex: none; }
+.conn.on { background: var(--ok); }
+button { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.small { padding: 6px 12px; font-size: 14px; }
+button.icon { border: none; background: none; padding: 4px; margin-left: -6px; display: grid; place-items: center; }
+button.link { border: none; background: none; padding: 2px 0; color: var(--muted); font-size: 13px; text-decoration: underline; }
+
+/* ---------- chat list ---------- */
+.list { flex: 1; overflow-y: auto; padding: 6px 0 calc(16px + env(safe-area-inset-bottom)); }
+.chat-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none; }
+.chat-row .grow { flex: 1; min-width: 0; }
+.chat-row .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-row .meta { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-soft); flex: none; animation: pulse 1.2s infinite; }
+.empty { padding: 40px 24px; text-align: center; color: var(--muted); }
+
+/* ---------- messages ---------- */
+.messages { flex: 1; overflow-y: auto; padding: 12px 12px 8px; display: flex; flex-direction: column; gap: 6px; overscroll-behavior: contain; }
+.row { display: flex; flex-direction: column; }
+.row.user { align-items: flex-end; margin-top: 8px; }
+.row.ai { align-items: flex-start; }
+.ucol { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; max-width: 86%; }
+.bubble { max-width: 92%; padding: 8px 13px; border-radius: 18px; overflow-wrap: anywhere; }
+.row.user .bubble { max-width: 100%; background: var(--user-bubble); color: #fff; border-bottom-right-radius: 6px; white-space: pre-wrap; }
+.row.user .bubble.queued { opacity: .75; border: 1px dashed rgba(255, 255, 255, .45); }
+.row.ai .bubble { background: var(--ai-bubble); border-bottom-left-radius: 6px; }
+.bubble > :first-child { margin-top: 0; }
+.bubble > :last-child { margin-bottom: 0; }
+.bubble p { margin: 0 0 8px; }
+.bubble pre { background: var(--code-bg); color: var(--code-text); padding: 10px; border-radius: 10px; overflow-x: auto; font-size: 13px; }
+.bubble code { font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; }
+.bubble a { color: var(--accent-soft); }
+.umeta { display: flex; gap: 10px; font-size: 12.5px; color: var(--muted); }
+.umeta .q { font-style: italic; }
+.agent { font-size: 12px; font-weight: 600; color: var(--muted); margin: 6px 0 2px 4px; }
+.note { align-self: center; text-align: center; font-size: 13px; color: var(--muted); padding: 4px 12px; }
+.note.err { color: var(--err); }
+.note button.link { margin-left: 6px; }
+
+/* ---------- tool cards ---------- */
+.card { width: 100%; max-width: 100%; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; font-size: 14px; }
+.card summary { display: flex; align-items: center; gap: 8px; padding: 8px 12px; list-style: none; cursor: pointer; }
+.card summary::-webkit-details-marker { display: none; }
+.card .verb { font-weight: 600; white-space: nowrap; }
+.card .target { flex: 1; min-width: 0; color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .st { flex: none; font-size: 13px; color: var(--ok); }
+.card.error .st, .card.denied .st { color: var(--err); }
+.card.stopped .st { color: var(--muted); }
+.card pre { margin: 0; padding: 10px 12px; border-top: 1px solid var(--border); max-height: 280px; overflow: auto; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.card .shot { display: block; width: 100%; border-top: 1px solid var(--border); }
+.ask { width: 100%; margin-top: 4px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--accent); background: var(--surface); }
+.ask .q { font-weight: 600; margin-bottom: 8px; }
+.ask .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- composer ---------- */
+.composer { flex: none; padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: var(--surface); }
+.box { display: flex; align-items: flex-end; gap: 8px; border: 1px solid var(--border); border-radius: 22px; padding: 6px 6px 6px 14px; background: var(--bg); }
+.box textarea { flex: 1; border: none; outline: none; background: none; resize: none; max-height: 160px; padding: 6px 0; line-height: 1.4; }
+.send { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--accent); color: #fff; display: grid; place-items: center; padding: 0; flex: none; }
+.send svg { width: 20px; height: 20px; }
+.send .i-stop { display: none; }
+.send.stop .i-send { display: none; }
+.send.stop .i-stop { display: block; }
+.new-options { display: flex; gap: 8px; margin-bottom: 8px; }
+.new-options label { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: var(--muted); min-width: 0; }
+.new-options select { width: 100%; padding: 8px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); }
+.activity { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.act { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); min-width: 0; }
+.act .who { font-weight: 600; white-space: nowrap; }
+.act .what { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act .time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+
+/* ---------- pairing ---------- */
+.pair { align-items: center; justify-content: center; text-align: center; padding: 32px; gap: 6px; }
+.big-logo { width: 88px; height: 88px; }
+.pair p { color: var(--muted); max-width: 340px; }
+
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(90px + env(safe-area-inset-bottom)); padding: 10px 14px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 14px; text-align: center; z-index: 10; }
+
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: .35; } }

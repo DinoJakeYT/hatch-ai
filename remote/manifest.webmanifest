@@ -1,0 +1,12 @@
+{
+  "name": "Hatch",
+  "short_name": "Hatch",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#161b1c",
+  "theme_color": "#161b1c",
+  "icons": [
+    { "src": "icon.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "logo.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

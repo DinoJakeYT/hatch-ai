@@ -476,3 +476,13 @@ dialog::backdrop { background: rgba(10, 14, 13, .5); }
 .update-btn svg { width: 16px; height: 16px; flex: none; }
 .update-btn:hover { filter: brightness(1.1); }
 #about a, [data-pane="about"] a { color: var(--accent-soft); }
+
+/* ---------- Phone ---------- */
+.phone-box { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.phone-codes { display: flex; gap: 16px; flex-wrap: wrap; }
+.phone-code { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); }
+.phone-code .addr { font: 12.5px "Cascadia Code", Consolas, monospace; color: var(--muted); }
+/* the QR code draws itself with thin lines: keep Hatch's icon style off it */
+.phone-code .qr svg { width: 200px; height: 200px; stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter; border-radius: 6px; }
+.phone-steps { margin: 0; padding-left: 20px; }
+[data-pane="phone"] a { color: var(--accent-soft); }

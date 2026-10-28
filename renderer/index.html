@@ -215,6 +215,32 @@
             <p class="hint">Claude (subscription, API key, OpenRouter, custom), ChatGPT/OpenAI and local models can lead. Any AI can be a helper. Helpers work one at a time in the chat's project folder, and each keeps its own memory of the chat.</p>
           </div>
 
+          <div class="pane" data-pane="phone">
+            <h3>Phone</h3>
+            <p class="hint">Use Hatch from your phone's browser: watch chats live, start new ones, send messages (even while an AI works), approve steps, stop and undo. Your PC does the work, so keep Hatch open.</p>
+            <div class="card-set">
+              <label class="check-line"><input type="checkbox" id="phoneOn"> Let my phone connect</label>
+              <div id="phoneBox" class="phone-box" hidden>
+                <div id="phoneCodes" class="phone-codes"></div>
+                <ol class="hint phone-steps">
+                  <li>Connect your phone to the same Wi-Fi as this PC.</li>
+                  <li>Scan the code with your phone's camera and open the link.</li>
+                  <li>Optional: use "Add to Home Screen" in the phone's browser to get a Hatch app icon.</li>
+                </ol>
+                <div class="line"><span class="status-text" id="phoneStatus"></span></div>
+                <div class="line">
+                  <label class="field" style="flex:0 0 120px">Port<input type="number" id="phonePort" min="1024" max="65535"></label>
+                  <button class="btn danger" id="phoneReset" style="align-self:flex-end">Disconnect all phones</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-set">
+              <div class="title-line">Away from home</div>
+              <p class="hint">Install <a href="https://tailscale.com/download">Tailscale</a> (free) on this PC and on your phone, and sign in to both with the same account. A second code then shows up here that works from anywhere, privately and encrypted. Hatch is never put on the open internet.</p>
+            </div>
+            <p class="hint">Anyone with this code can use Hatch on this PC, so don't share it or show it in videos. If one gets out, press "Disconnect all phones" for a new code. The first time you turn this on, Windows asks whether Hatch may use the network: allow it on private networks.</p>
+          </div>
+
           <div class="pane" data-pane="about">
             <h3>Hatch <span id="aboutVersion"></span></h3>
             <p class="hint">Free and open source under the GPL-3.0 license. <a id="aboutLink" href="https://github.com/DinoJakeYT/hatch-ai">Source code, releases and issues on GitHub</a></p>

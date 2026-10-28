@@ -13,6 +13,7 @@ A Windows desktop app where AIs build things for you. Pick Claude, ChatGPT, Gemi
 - **Undo.** Hatch saves the project before every message, so one click puts the files back.
 - **Play.** Run the program or page the AI just built from the top bar.
 - **Send messages while it works.** They reach the AI at its next step without stopping it.
+- **Use it from your phone.** Scan a QR code and your phone's browser shows your chats live. You can start chats, send messages, approve steps, stop and undo, over your home network or from anywhere with Tailscale.
 - **Overnight work.** Let a local model keep building and improving a project for hours, with checkpoints after every working build and a report in the morning.
 - **Skills.** Import skills (SKILL.md) from GitHub or a folder, write your own, or approve the ones an AI proposes. Every AI gets them.
 - **Usage tracking.** Plan limits and API costs per AI, with optional monthly budgets.

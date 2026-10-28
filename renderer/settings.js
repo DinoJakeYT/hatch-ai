@@ -9,6 +9,7 @@ const TABS = [
   ['teams', 'Teams', ICON.team],
   ['behavior', 'Permissions', ICON.shieldOk],
   ['memory', 'Instructions & memory', ICON.book],
+  ['phone', 'Phone', ICON.phone],
   ['about', 'About & updates', ICON.download],
 ];
 
@@ -37,6 +38,7 @@ const PANE_LOADERS = {
   skills: () => loadSkills(),
   teams: () => renderTeamsPane(),
   about: () => renderUpdate(),
+  phone: () => loadPhone(),
 };
 
 document.querySelectorAll('#tabs .tab').forEach(t => t.addEventListener('click', () => {
@@ -626,6 +628,37 @@ $('teamNew').addEventListener('click', () => {
   const names = $('teamList').querySelectorAll('.team-name');
   names[names.length - 1]?.select();
 });
+
+// ---------- phone ----------
+
+async function loadPhone(status) {
+  const s = status || await api.phoneStatus();
+  $('phoneOn').checked = s.enabled;
+  $('phoneBox').hidden = !s.enabled;
+  if (document.activeElement !== $('phonePort')) $('phonePort').value = s.port;
+  const codes = $('phoneCodes');
+  codes.innerHTML = '';
+  if (s.enabled && !s.running) codes.appendChild(el(`<p class="hint">${esc(s.error || 'Starting…')}</p>`));
+  else if (s.running && !s.urls.length) codes.appendChild(el('<p class="hint">This PC isn\'t connected to a network right now.</p>'));
+  for (const u of s.urls) {
+    // the QR code is made by Hatch itself (lib/remote.mjs)
+    const card = el(`<div class="phone-code"><div class="qr">${u.qr}</div><b>${u.kind === 'tailscale' ? 'Anywhere (Tailscale)' : 'Home network'}</b><span class="addr"></span><button class="btn">Copy link</button></div>`);
+    card.querySelector('.addr').textContent = `${u.address}:${s.port}`;
+    card.querySelector('.btn').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(u.url); setStatus($('phoneStatus'), 'Link copied. Only send it to yourself: it includes the key.', 'good'); } catch {}
+    });
+    codes.appendChild(card);
+  }
+  if (s.running) setStatus($('phoneStatus'), s.phones ? `${s.phones} phone${s.phones === 1 ? '' : 's'} connected now` : 'Waiting for your phone…', s.phones ? 'good' : '');
+}
+
+$('phoneOn').addEventListener('change', async () => loadPhone(await api.setPhone({ enabled: $('phoneOn').checked })));
+$('phonePort').addEventListener('change', async () => loadPhone(await api.setPhone({ port: Number($('phonePort').value) })));
+$('phoneReset').addEventListener('click', async () => {
+  const r = await confirmBox({ title: 'Disconnect all phones?', text: 'Hatch makes a new code. Phones that were connected have to scan it again.', yes: 'Disconnect', danger: true });
+  if (r.ok) loadPhone(await api.resetPhoneKey());
+});
+api.onPhoneChanged(() => { if ($('settings').open) loadPhone(); });
 
 // ---------- about and updates ----------
 

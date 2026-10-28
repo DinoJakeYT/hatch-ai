@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#161b1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hatch">
+  <title>Hatch</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="logo.svg">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- chats -->
+  <section id="listView" class="view">
+    <header class="bar">
+      <img src="logo.svg" alt="" class="logo">
+      <h1>Hatch</h1>
+      <span id="conn" class="conn" title="Connection to your PC"></span>
+      <button id="newBtn" class="primary small">New chat</button>
+    </header>
+    <div id="chatList" class="list"></div>
+  </section>
+
+  <!-- one chat -->
+  <section id="chatView" class="view" hidden>
+    <header class="bar">
+      <button id="backBtn" class="icon" aria-label="Back">
+        <svg viewBox="0 0 20 20"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>
+      </button>
+      <div class="titles"><div id="chatTitle" class="title"></div><div id="chatSub" class="sub"></div></div>
+      <span id="conn2" class="conn"></span>
+    </header>
+    <main id="messages" class="messages"></main>
+    <footer class="composer">
+      <div id="activity" class="activity" hidden></div>
+      <div id="newOptions" class="new-options" hidden>
+        <label>AI<select id="modelSel"></select></label>
+        <label>Permissions<select id="permSel">
+          <option value="ask">Ask first</option>
+          <option value="edits">Accept edits</option>
+          <option value="always">Always accept</option>
+          <option value="readonly">Read only</option>
+        </select></label>
+      </div>
+      <div class="box">
+        <textarea id="input" rows="1" placeholder="Message Hatch…"></textarea>
+        <button id="sendBtn" class="send" aria-label="Send">
+          <svg class="i-send" viewBox="0 0 20 20"><path d="M10 16V4M5 9l5-5 5 5"/></svg>
+          <svg class="i-stop" viewBox="0 0 20 20"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/></svg>
+        </button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- not paired -->
+  <section id="pairView" class="view pair" hidden>
+    <img src="logo.svg" alt="" class="big-logo">
+    <h1>Connect to Hatch</h1>
+    <p id="pairText">On your PC, open Hatch, go to <b>Settings &gt; Phone</b>, turn it on, and scan the QR code with this phone's camera.</p>
+  </section>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="vendor/marked.js"></script>
+  <script src="vendor/purify.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
