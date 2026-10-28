@@ -1,7 +1,7 @@
 {
   "name": "hatch",
   "productName": "Hatch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A desktop app where Claude, ChatGPT, Gemini and local models build things in your project folders, alone or as a team.",
   "author": "DinoJakeYT",
   "license": "GPL-3.0-only",
